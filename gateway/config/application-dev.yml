@@ -1,0 +1,52 @@
+server:
+  port: 9023
+  servlet:
+    context-path: /${spring.application.name}
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      # 璺敱鏁扮粍锛氭寚褰撹姹傛弧瓒充粈涔堟牱鐨勬柇瑷�鏃讹紝杞彂鍒板摢涓湇鍔′笂
+      routes:
+        # 璺敱鏍囪瘑锛岃姹傚敮涓�锛屽悕绉颁换鎰�
+        - id: gateway-provider_1
+          # 璇锋眰鏈�缁堣杞彂鍒扮殑鐩爣鍦板潃
+          uri: http://localhost:9024
+          # 璁剧疆鏂█
+          predicates:
+            # Path Route Predicate Factory 鏂█锛屾弧瓒� /gateway/provider/** 璺緞鐨勮姹傞兘浼氳璺敱鍒� http://localhost:9024 杩欎釜uri涓�
+            - Path=/gateway/provider/**
+            # Weight Route Predicate Factory 鏂█锛屽悓涓�鍒嗙粍鎸夌収鏉冮噸杩涜鍒嗛厤娴侀噺锛岃繖閲屽垎閰嶄簡80%
+            # 绗竴涓猤roup1鏄垎缁勫悕锛岀浜屼釜鍙傛暟鏄潈閲�
+            - Weight=group1, 8
+          # 閰嶇疆杩囨护鍣紙灞�閮級
+          filters:
+            # StripPrefix锛氬幓闄ゅ師濮嬭姹傝矾寰勪腑鐨勫墠1绾ц矾寰勶紝鍗�/gateway
+            - StripPrefix=1            
+            
+        - id: gateway-provider_2
+          uri: http://localhost:9025
+          # 璁剧疆鏂█
+          predicates:
+            - Path=/gateway/provider/**
+            # Weight Route Predicate Factory锛屽悓涓�鍒嗙粍鎸夌収鏉冮噸杩涜鍒嗛厤娴侀噺锛岃繖閲屽垎閰嶄簡20%
+            - Weight=group1, 2
+            # 閰嶇疆杩囨护鍣紙灞�閮級
+          filters:
+            # StripPrefix锛氬幓闄ゅ師濮嬭姹傝矾寰勪腑鐨勫墠1绾ц矾寰勶紝鍗�/gateway
+            - StripPrefix=1 
+    #服务注册与发现
+    consul:
+      host: localhost
+      port: 8500 
+          
+#监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  metrics:
+    tags:
+     application: ${spring.application.name} 
